@@ -7,6 +7,7 @@ from pathlib import  Path
 import XmlReaderWriter
 import errno
 import time
+import activity_detector
 
 
 import datetime
@@ -141,7 +142,7 @@ def activity_detection_trigger(cctv_description, video_source,configuration,serv
     cctv_info['video_source'] = video_source
     cctv_info['configuration'] = configuration
     cctv_info['server_address'] = server_address
-    detect_actvity.fire(cctv_info)
+    activity_detector.detect_actvity(cctv_info)
 
 
 for cctv_source in cctv_sources:
