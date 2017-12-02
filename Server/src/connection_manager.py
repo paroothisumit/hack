@@ -1,4 +1,6 @@
 from mysql import connector
+
+
 class DB:
     _db_connection = None
     _db_cur = None
