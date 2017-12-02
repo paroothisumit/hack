@@ -37,7 +37,7 @@ def check_new_alert():
         for message in response.json():
             pprint.pprint(message)
 
-            
+            winsound.Beep(3000,800)
         time.sleep(interval)
 
 
