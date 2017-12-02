@@ -1,17 +1,18 @@
 import json
-import os,requests,sys
+import os, requests, sys
 import pprint
 from datetime import datetime, time
-from pathlib import  Path
+from pathlib import Path
 
 import errno
 
 import winsound
 
 
-def does_id_exist(site_id,node_type):
+def does_id_exist(site_id, node_type):
     response = requests.post(server_address + 'check_id_exists', json={'node_type': node_type, 'site_id': site_id})
     return response.json()
+
 
 def is_server_address_correct():
     try:
@@ -37,13 +38,14 @@ def check_new_alert():
         for message in response.json():
             pprint.pprint(message)
 
-            winsound.Beep(3000,800)
+            winsound.Beep(3000, 800)
         time.sleep(interval)
 
 
 def register_client():
     response = requests.post(server_address + 'register_clientb', json=json.dumps(configuration))
     return response.json()
+
 
 def initialize():
     global configuration
@@ -74,9 +76,8 @@ def initialize():
         description = input('Enter description')
         contact = input('Enter contact')
 
-
         configuration = {"site_id": id, "address": address, "description": description, "contact": contact,
-                        }
+                         }
         with open(conf_file_name, 'w') as outfile:
             json.dump(configuration, outfile)
         register_client()
@@ -88,12 +89,8 @@ def initialize():
             raise
 
 
+server_address = input('Enter server address:port')
 
-server_address=input('Enter server address:port')
-
-server_address='http://'+server_address+'/'
-configuration=None
+server_address = 'http://' + server_address + '/'
+configuration = None
 initialize()
-
-
-

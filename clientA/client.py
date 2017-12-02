@@ -2,7 +2,7 @@ import json
 import os,requests,sys
 import pprint
 from pathlib import  Path
-
+import XmlReaderWriter
 import errno
 
 import datetime
@@ -33,7 +33,8 @@ def register_client():
 
 def initialize():
     global configuration
-
+    global cctv_descriptions
+    global cctv_sources
 
 
     cwd = os.getcwd()
@@ -53,6 +54,7 @@ def initialize():
 
     else:
         print('Setting up....ClientA')
+
         while True:
             id = input('Enter SiteID')
             if not does_id_exist(id, 'clienta'):
@@ -62,6 +64,7 @@ def initialize():
         address = input('Enter address')
         description = input('Enter description')
         contact = input('Enter contact')
+
 
         while True:
             nearest_node = input('Enter Nearest control room id')
@@ -80,7 +83,20 @@ def initialize():
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+    cctv_file_name = 'CCTV_INFO.xml'
+    cctv_file_path = Path(cwd + '/' + cctv_file_name)
 
+    if cctv_file_path.is_file():
+        print('CCTV_INFO file found')
+        cctv_sources, cctv_descriptions = XmlReaderWriter.read_xml()
+    else:
+        number_of_cctvs = int(input('Enter number of cctvs at this site'))
+        for i in range(0, number_of_cctvs):
+            source_ = input('Enter source for cctv-' + str(i))
+            description_ = input('Enter description for cctv-' + str(i))
+            cctv_sources.append(source_)
+            cctv_descriptions.append(description_)
+        XmlReaderWriter.create_xml(cctv_sources, cctv_descriptions)
 
 
 
@@ -89,13 +105,13 @@ server_address=input('Enter server address:port')
 
 server_address='http://'+server_address+'/'
 configuration=None
+cctv_sources=[]
+cctv_descriptions=[]
 initialize()
 
 
 
 
-
-check_new_alert()
 
 
 
