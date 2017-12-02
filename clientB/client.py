@@ -1,6 +1,7 @@
 import json
 import os, requests, sys
 import pprint
+import threading
 from datetime import datetime, time
 from pathlib import Path
 
@@ -94,3 +95,9 @@ server_address = input('Enter server address:port')
 server_address = 'http://' + server_address + '/'
 configuration = None
 initialize()
+if configuration["id"] == '1':  # headquarter
+    print('Headquarter')
+    #threading.Thread(target=gui_controller.gui_init, kwargs={'server_address': server_address}).start()
+print('Idha')
+
+check_new_alert()

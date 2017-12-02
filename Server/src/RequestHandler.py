@@ -42,6 +42,23 @@ def check_id_exists():
     return jsonify(dao.check_if_id_exists(client_type,id))
 
 
+@app.route('/new_alert', methods=['POST'])
+def new_alert():
+    print(request.get_json())
+    request_dict = json.loads(request.get_json())
+    dao.store_new_alert(request_dict["site_id"], request_dict["activity_recognized"], request_dict["cctv_location"],request_dict["time"])
+
+    return jsonify(True)
+
+@app.route('/check_new_alert', methods=['POST'])
+def check_new_alert():
+    print(request.get_json())
+    request_dict=request.get_json()
+    new_alerts=dao.check_new_alerts(request_dict["site_id"], request_dict["last_checked"])
+
+    return jsonify(new_alerts)
+
+
 def create_upload_folder():
     upload_folder_name = 'uploads'
     upload_folder_path = Path(os.getcwd() + '/' + upload_folder_name)

@@ -1,13 +1,17 @@
 import json
 import os,requests,sys
 import pprint
+import threading
+from multiprocessing.pool import Pool
 from pathlib import  Path
 import XmlReaderWriter
 import errno
+import time
+
 
 import datetime
 
-
+from multiprocessing import Process
 
 
 def does_id_exist(site_id,node_type):
@@ -30,6 +34,23 @@ if is_server_address_correct():
 def register_client():
     response = requests.post(server_address + 'register_clienta', json=json.dumps(configuration))
     return response.json()
+
+
+def fetch_settings():
+    global configuration
+    while True:
+
+        response = requests.post(server_address + 'fetch_settings', json={'site_id': configuration["site_id"]})
+        new_configuration = response.json()
+        if configuration!=new_configuration:
+            configuration=new_configuration
+
+            conf_file_name = 'conf.txt'
+            with open(conf_file_name, 'w') as outfile:
+                json.dump(configuration, outfile)
+
+        # print(configuration)
+        time.sleep(15)
 
 def initialize():
     global configuration
@@ -108,7 +129,32 @@ configuration=None
 cctv_sources=[]
 cctv_descriptions=[]
 initialize()
+threading.Thread(target=fetch_settings).start()
+print(cctv_sources)
+        #exit(0)
+pool=Pool(processes=len(cctv_sources))
 
+
+def activity_detection_trigger(cctv_description, video_source,configuration,server_address):
+    cctv_info={}
+    cctv_info['cctv_description']=cctv_description
+    cctv_info['video_source'] = video_source
+    cctv_info['configuration'] = configuration
+    cctv_info['server_address'] = server_address
+    detect_actvity.fire(cctv_info)
+
+
+for cctv_source in cctv_sources:
+    #if not i==len(cctv_sources)-1:
+    #threading.Thread(target=activity_detection_trigger,args=['CCTV :'+cctv_descriptions[i], str(cctv_source)]).start()  # for each cctv specify source & location
+    #else:
+    #    activity_detection_trigger('CCTV :'+cctv_descriptions[i], str(cctv_source))
+    #pool.apply_async(activity_detection_trigger,[cctv_descriptions[i],str(cctv_source)])
+    Process(target=activity_detection_trigger,args=[cctv_descriptions[i],str(cctv_source),configuration,server_address]).start()
+    i=i+1
+
+    print(i)
+    print('cc')
 
 
 

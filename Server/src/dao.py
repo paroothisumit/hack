@@ -43,3 +43,32 @@ def register_clientb(client_info):
     q = 'INSERT INTO ClientB (ID,Description,Address,Contact) values(%s,%s,%s,%s)'
     DB().query(q, (client_id, address, description, contact))
     return None
+
+
+def store_new_alert(siteid, activity_recognized, cctv_location,time):
+    print('recieved new alert from ' + str(siteid) + 'at '+time)
+    query_string = 'Select NearestNode,Description,Address from ClientA where ID=%s'
+    db_obj = DB()
+    result_set = db_obj.query(query_string, (siteid,))
+    nearestNode, description, address = result_set.fetchone()
+    description = cctv_location + ' ' + description
+
+    query_string = 'Insert into Messages (SourceID,DestinationID,Time,ActivityRecognized,LocationDescription,LocationAddress) values(%s,%s,%s,%s,%s,%s)'
+
+    DB().query(query_string, (siteid, 1, time, activity_recognized, description, address))
+    DB().query(query_string, (siteid, nearestNode, time, activity_recognized, description, address))
+
+
+def check_new_alerts(site_id, last_checked):
+    query_string = 'Select * from Messages where DestinationID=%s and Time>%s'
+    db_obj = DB()
+    result_set = db_obj.query(query_string, (site_id, last_checked))
+    message_list = []
+    for (SourceID, DestinationID, Time, activity_recognized, location_description, location_address) in result_set:
+        new_message = {'SourceID': SourceID, 'DestinationID': DestinationID, 'Time': Time,
+                       'activity_recognized': activity_recognized, 'location_description': location_description,
+                       'location_address': location_address}
+        message_list.append(new_message)
+
+    print(message_list)
+    return message_list
