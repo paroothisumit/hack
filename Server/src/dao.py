@@ -21,6 +21,19 @@ def register_clienta(client_info):
     DB().query(q, (client_id, address, description, contact, nearest_node, is_prohibited))
     return None
 
+
+def fetch_settings(site_id):
+    query_string='Select * from ClientA where ID=%s'
+    db_obj=DB()
+    result_set=db_obj.query(query_string,(site_id,))
+    if result_set.rowcount==0:
+        return None
+    id,description,address,contact,nearestNode,isProhibited=result_set.fetchone()
+    config_settings={'site_id':id,'description':description,'address':address,'contact':contact,'nearest_node':nearestNode,'isProhibited':isProhibited}
+    return config_settings
+
+
+
 def register_clientb(client_info):
     print('Registering clientb')
     client_id = client_info['site_id']

@@ -21,7 +21,11 @@ def register_clientb():
 
     return jsonify(True)
 
-
+@app.route('/fetch_settings', methods=['POST'])
+def fetch_settings():
+    request_dict=request.get_json()
+    config_settings=dao.fetch_settings(request_dict["site_id"])
+    return jsonify(config_settings)
 
 @app.route('/register_clienta',methods=['POST'])
 def register_clienta():
