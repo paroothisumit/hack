@@ -9,6 +9,14 @@ def check_if_id_exists(table_name, id):
     return False
 
 
+def get_site_info(id):
+    all_data=fetch_settings(id)
+    if all_data is None:
+        return None
+
+    info={'description':all_data['description'],'contact':all_data['contact'],'address':all_data['address']}
+    return info
+
 def register_clienta(client_info):
     print('Registering clienta')
     client_id=client_info['site_id']
@@ -53,7 +61,7 @@ def store_new_alert(siteid, activity_recognized, cctv_location,time):
     nearestNode, description, address = result_set.fetchone()
     description = cctv_location + ' ' + description
 
-    query_string = 'Insert into Messages (SourceID,DestinationID,Time,ActivityRecognized,LocationDescription,LocationAddress) values(%s,%s,%s,%s,%s,%s)'
+    query_string = 'Insert into Messages (SourceID,DestinationID,Time,Activity_Recognized,Location_Description,Location_Address) values(%s,%s,%s,%s,%s,%s)'
 
     DB().query(query_string, (siteid, 1, time, activity_recognized, description, address))
     DB().query(query_string, (siteid, nearestNode, time, activity_recognized, description, address))

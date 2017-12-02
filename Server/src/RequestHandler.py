@@ -5,8 +5,10 @@ from pathlib import Path
 
 from flask import Flask,jsonify,request,send_file,json
 import dao
+
 app=Flask(__name__)
 
+is_file_ready={}
 @app.route('/',methods=['GET'])
 def hand_shake():
     return jsonify(True)
@@ -67,6 +69,36 @@ def create_upload_folder():
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+
+@app.route('/store_image', methods=['POST'])
+def store_image():
+    #print(request.files)
+
+    img1=request.files['media']
+    print(type(img1))
+    is_file_ready[img1.filename] = 0
+    img1.save('uploads/'+img1.filename)
+    is_file_ready[img1.filename]=1
+    return jsonify(True)
+
+@app.route('/get_site_info', methods=['POST'])
+def get_site_info():
+    request_dict = request.get_json()
+    print(request.get_json())
+    return jsonify(dao.get_site_info(request_dict['site_id']))
+
+@app.route('/get_image', methods=['POST'])
+def get_image():
+    #print(request.files)
+    request_dict=request.get_json()
+    file_name=request_dict["file_name"]
+    file_path='uploads\\'+file_name
+    print(file_name)
+    while file_name not in is_file_ready or is_file_ready[file_name]!=1:
+        if Path(file_path).is_file():
+            break
+        #print('looping....')
+    return send_file('uploads\\'+file_name, mimetype='image/jpg')
 
 if __name__=='__main__':
     create_upload_folder()

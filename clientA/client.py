@@ -122,40 +122,36 @@ def initialize():
 
 
 
+if __name__=='__main__':
+    server_address=input('Enter server address:port')
 
-server_address=input('Enter server address:port')
-
-server_address='http://'+server_address+'/'
-configuration=None
-cctv_sources=[]
-cctv_descriptions=[]
-initialize()
-threading.Thread(target=fetch_settings).start()
-print(cctv_sources)
-        #exit(0)
-pool=Pool(processes=len(cctv_sources))
-
-
-def activity_detection_trigger(cctv_description, video_source,configuration,server_address):
-    cctv_info={}
-    cctv_info['cctv_description']=cctv_description
-    cctv_info['video_source'] = video_source
-    cctv_info['configuration'] = configuration
-    cctv_info['server_address'] = server_address
-    activity_detector.detect_actvity(cctv_info)
+    server_address='http://'+server_address+'/'
+    configuration=None
+    cctv_sources=[]
+    cctv_descriptions=[]
+    initialize()
+    threading.Thread(target=fetch_settings).start()
+    print(cctv_sources)
+            #exit(0)
+    pool=Pool(processes=len(cctv_sources))
 
 
-for cctv_source in cctv_sources:
-    #if not i==len(cctv_sources)-1:
-    #threading.Thread(target=activity_detection_trigger,args=['CCTV :'+cctv_descriptions[i], str(cctv_source)]).start()  # for each cctv specify source & location
-    #else:
-    #    activity_detection_trigger('CCTV :'+cctv_descriptions[i], str(cctv_source))
-    #pool.apply_async(activity_detection_trigger,[cctv_descriptions[i],str(cctv_source)])
-    Process(target=activity_detection_trigger,args=[cctv_descriptions[i],str(cctv_source),configuration,server_address]).start()
-    i=i+1
 
-    print(i)
-    print('cc')
+
+
+    i=0
+    for cctv_source in cctv_sources:
+        #if not i==len(cctv_sources)-1:
+        #threading.Thread(target=activity_detection_trigger,args=['CCTV :'+cctv_descriptions[i], str(cctv_source)]).start()  # for each cctv specify source & location
+        #else:
+        #    activity_detection_trigger('CCTV :'+cctv_descriptions[i], str(cctv_source))
+        #pool.apply_async(activity_detection_trigger,[cctv_descriptions[i],str(cctv_source)])
+        cctv_info={'cctv_description':cctv_descriptions[i],'video_source':str(cctv_source),'configuration':configuration,'server_address':server_address}
+        Process(target=activity_detector.detect_activity,args=[cctv_info,]).start()
+        i=i+1
+
+        print(i)
+        print('cc')
 
 
 

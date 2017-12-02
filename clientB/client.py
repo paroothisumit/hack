@@ -4,10 +4,12 @@ import pprint
 import threading
 from datetime import datetime, time
 from pathlib import Path
-
-import errno
+import gui_controller
+import errno,time
 
 import winsound
+
+from PIL import Image
 
 
 def does_id_exist(site_id, node_type):
@@ -27,18 +29,37 @@ def is_server_address_correct():
 if is_server_address_correct():
     print('Server Responded')
 
+def create_file_name(Time_str,site_id):
+
+    Time_str=str(Time_str)
+    print(Time_str)
+
+    Time=datetime.strptime(Time_str,'%a, %d %b %Y %H:%M:%S %Z')
+    Time_str_conv=datetime.strftime(Time,'%Y_%m_%d_%H_%M_%S_')
+    return Time_str_conv+str(site_id)+'.jpg'
 
 def check_new_alert():
     interval = 4
-    last_checked = datetime.datetime.now()
+    last_checked = datetime.now()
     while True:
         response = requests.post(server_address + 'check_new_alert',
-                                 json={'site_id': configuration["id"], 'last_checked': str(last_checked)})
-        last_checked = datetime.datetime.now()
+                                 json={'site_id': configuration["site_id"], 'last_checked': str(last_checked)})
+        last_checked = datetime.now()
 
         for message in response.json():
             pprint.pprint(message)
+            image_file_name = create_file_name(message["Time"], message["SourceID"], )
 
+            response = requests.post(server_address + 'get_image', json={'file_name': image_file_name}, stream=True)
+            if response.status_code == 200:
+                with open('uploads//' + image_file_name, 'wb') as f:
+                    for chunk in response.iter_content(1024 * 1024):
+                        f.write(chunk)
+
+            img = Image.open('uploads//' + image_file_name)
+            img.show()
+            if configuration["site_id"] == '1':
+                gui_controller.new_alert(message)
             winsound.Beep(3000, 800)
         time.sleep(interval)
 
@@ -95,9 +116,9 @@ server_address = input('Enter server address:port')
 server_address = 'http://' + server_address + '/'
 configuration = None
 initialize()
-if configuration["id"] == '1':  # headquarter
+if configuration["site_id"] == '1':  # headquarter
     print('Headquarter')
-    #threading.Thread(target=gui_controller.gui_init, kwargs={'server_address': server_address}).start()
-print('Idha')
+    threading.Thread(target=gui_controller.gui_init, kwargs={'server_address': server_address}).start()
+print('Checking for alerts...')
 
 check_new_alert()

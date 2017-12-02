@@ -7,6 +7,7 @@ import argparse
 from imutils.object_detection import non_max_suppression
 import alert_raiser
 import threading
+import copy
 
 
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -38,6 +39,7 @@ def background_subtraction(previous_frame, frame_resized_grayscale, min_area):
 
 
 def detect_activity(cctv_info):
+
     video_source=cctv_info['video_source']
     print('Video source:' + str(video_source))
     count = 0
@@ -64,11 +66,13 @@ def detect_activity(cctv_info):
         if temp == 1:
             count_1, frame_processed = detect_people(frame_resized)
             if count_1 >= 1:
+
                 activity_recognized="Pedestrian Movement Detected"
                 cctv_description=cctv_info['cctv_description']
                 configuration=cctv_info['configuration']
                 server_address=cctv_info['server_address']
-                threading.Thread(target=alert_raiser.raise_alert,args=[activity_recognized,cctv_description,configuration,server_address,frame]).start()
+                threading.Thread(target=alert_raiser.raise_alert,args=[activity_recognized,cctv_description,configuration,server_address,frame_processed]).start()
+                cv2.waitKey(4000)
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 break
