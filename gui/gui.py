@@ -101,6 +101,7 @@ class Example(QWidget):
         self.move(300, 150)
         self.setWindowTitle('City View')
         self.setLayout(self.grid)
+
         self.show()
 
     def normal_state(self, id):
@@ -126,11 +127,38 @@ class Example(QWidget):
         self.dia.show()
         self.normal_state(id)
 
-
-
-
+# class MainWidget(QWidget):
+#     def __init__(self, server_address):
+#         super().__init__()
+#         self.example_widget = None
+#         self.server_address = server_address
+#         self.title = 'PyQt5 simple window - pythonspot.com'
+#         self.left = 10
+#         self.top = 10
+#         self.width = width+10
+#         self.height = height+10
+#         self.initUI()
+#
+#     def initUI(self):
+#         self.setWindowTitle(self.title)
+#         self.setGeometry(self.left, self.top, self.width, self.height)
+#
+#         scroll = QScrollArea(self)
+#         # self.example_widget = Example(self.server_address)
+#
+#         label = QLabel()
+#         label.setAlignment(Qt.AlignVCenter)
+#         label.setText("SITE INFORMATION for ID: " + str(id))
+#         label.setStyleSheet('font-size:30px')
+#
+#         scroll.setFixedSize(width, height)
+#         scroll.setWidget(label)
+#         # scroll.show()
+#
+#         # self.statusBar().showMessage('Message in statusbar.')
+#         self.show()
 
 def rock(server_address):
     app = QApplication(sys.argv)
     ex = Example(server_address)
-    return ex,app
+    return ex, app
