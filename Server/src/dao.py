@@ -72,7 +72,7 @@ def check_new_alerts(site_id, last_checked):
     db_obj = DB()
     result_set = db_obj.query(query_string, (site_id, last_checked))
     message_list = []
-    for (SourceID, DestinationID, Time, activity_recognized, location_description, location_address) in result_set:
+    for (SourceID, DestinationID, Time, location_description,activity_recognized,  location_address) in result_set:
         new_message = {'SourceID': SourceID, 'DestinationID': DestinationID, 'Time': Time,
                        'activity_recognized': activity_recognized, 'location_description': location_description,
                        'location_address': location_address}

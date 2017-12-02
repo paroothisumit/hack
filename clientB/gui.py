@@ -31,8 +31,10 @@ class Dialog(QWidget):
             l2.setText("This site is not active.")
 
         else:
-            l2.setText("Site Description:    " + site_info["description"] + "\n\n" + "Contact:    " + site_info[
-                "contact"] + "\n\n" + "Address:    " + site_info["address"] )
+            print(str(site_info))
+            print(site_info)
+            l2.setText("Site Description:    " + str(site_info["description"]) + "\n\n" + "Contact:    " + site_info[
+               "contact"] + "\n\n" + "Address:    " + site_info["address"] )
 
             new_list = []
             if alert_content == "":
@@ -112,12 +114,13 @@ class Example(QWidget):
     def handle_new_alert(self,message_content):
         id=message_content["SourceID"]
         Time=message_content["Time"]
-        # Time=rectify_time_zone(Time)
+        Time=rectify_time_zone(Time)
 
         activity=message_content["activity_recognized"]
         location_description=message_content["location_description"]
 
-        self.alert_content[id] += (str(Time) + "~" + activity + "~" + location_description +"`")
+        if self.alert_content[id] is not None:
+            self.alert_content[id] += (str(Time) + "~" + activity + "~" + location_description +"`")
 
         self.activate_btn(id)
         self.new_alert[id]=1

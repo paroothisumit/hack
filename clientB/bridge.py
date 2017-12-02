@@ -3,7 +3,7 @@ import requests
 
 # original
 def get_client_info(id,server_address):
-    response = requests.post(server_address + 'get_site_info', json={'id': id})
+    response = requests.post(server_address + 'get_site_info', json={'site_id': id})
     return response.json()
 
 # dummy
