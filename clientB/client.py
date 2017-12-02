@@ -1,6 +1,13 @@
 import json
 import os,requests,sys
+import pprint
+from datetime import datetime, time
 from pathlib import  Path
+
+import errno
+
+import winsound
+
 
 def does_id_exist(site_id,node_type):
     response = requests.post(server_address + 'check_id_exists', json={'node_type': node_type, 'site_id': site_id})
@@ -19,6 +26,21 @@ if is_server_address_correct():
     print('Server Responded')
 
 
+def check_new_alert():
+    interval = 4
+    last_checked = datetime.datetime.now()
+    while True:
+        response = requests.post(server_address + 'check_new_alert',
+                                 json={'site_id': configuration["id"], 'last_checked': str(last_checked)})
+        last_checked = datetime.datetime.now()
+
+        for message in response.json():
+            pprint.pprint(message)
+
+            
+        time.sleep(interval)
+
+
 def register_client():
     response = requests.post(server_address + 'register_clientb', json=json.dumps(configuration))
     return response.json()
@@ -26,6 +48,8 @@ def register_client():
 def initialize():
     global configuration
     cwd = os.getcwd()
+    upload_folder_name = 'uploads'
+    upload_folder_path = Path(cwd + '/' + upload_folder_name)
     conf_file_name = 'conf.txt'
 
     conf_file_path = Path(cwd + '/' + conf_file_name)
@@ -57,7 +81,11 @@ def initialize():
             json.dump(configuration, outfile)
         register_client()
 
-
+    try:
+        os.makedirs(upload_folder_path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
 
 

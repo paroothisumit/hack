@@ -1,6 +1,14 @@
 import json
 import os,requests,sys
+import pprint
 from pathlib import  Path
+
+import errno
+
+import datetime
+
+
+
 
 def does_id_exist(site_id,node_type):
     response = requests.post(server_address + 'check_id_exists', json={'node_type': node_type, 'site_id': site_id})
@@ -29,6 +37,8 @@ def initialize():
 
 
     cwd = os.getcwd()
+    upload_folder_name = 'uploads'
+    upload_folder_path = Path(cwd + '/' + upload_folder_name)
     conf_file_name = 'conf.txt'
 
     conf_file_path = Path(cwd + '/' + conf_file_name)
@@ -65,6 +75,11 @@ def initialize():
         with open(conf_file_name, 'w') as outfile:
             json.dump(configuration, outfile)
         register_client()
+    try:
+        os.makedirs(upload_folder_path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
 
 
@@ -76,6 +91,11 @@ server_address='http://'+server_address+'/'
 configuration=None
 initialize()
 
+
+
+
+
+check_new_alert()
 
 
 
