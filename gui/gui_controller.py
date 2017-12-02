@@ -1,7 +1,7 @@
 import sys
 
 import gui
-
+import datetime
 ex=None
 app=None
 def gui_init(server_address):
@@ -18,4 +18,11 @@ def gui_init(server_address):
 def new_alert(message_content):
    ex.handle_new_alert(message_content)
 
-gui_init("127.0.0.1")
+def create_new_alert(sourceId=1, activity_recognized="fire detected", location_description="Udaipur"):
+    time = datetime.datetime.now()
+    ret = dict()
+    ret["Time"] = time
+    ret["SourceID"] = sourceId
+    ret["activity_recognized"] = activity_recognized
+    ret["location_description"] = location_description
+    return ret

@@ -10,36 +10,67 @@ btn_height = 60
 
 
 class Dialog(QWidget):
-    def __init__(self, site_info,id,parent=None,alert_content=None):
+    def __init__(self, site_info, id, parent=None,alert_content=""):
         dialog_width=800
         dialog_height=600
         QWidget.__init__(self, parent)
         l1 = QLabel()
         l2 = QLabel()
-        l3 = QLabel()
+        new_list_widget = QListWidget()
+        old_list_widget = QListWidget()
 
         l1.setAlignment(Qt.AlignVCenter)
         l1.setText("SITE INFORMATION for ID: "+str(id))
-        l1.setStyleSheet('font-size:30px')
-        l2.setStyleSheet('font-size:20px;border-bottom: medium dashed blue; ')
-        l3.setStyleSheet('font-size:20px;color:red;')
+        l1.setStyleSheet('font-size:16px')
+        l2.setStyleSheet('font-size:14px;border-bottom: medium dashed blue; ')
+        new_scroll = QScrollArea(self)
+        old_scroll = QScrollArea(self)
+        old_list_widget.setStyleSheet('font-size:12px;color:blue;')
+        new_list_widget.setStyleSheet('font-size:12px;color:red;')
         if site_info is None:
             l2.setText("This site is not active.")
 
         else:
             l2.setText("Site Description:    " + site_info["description"] + "\n\n" + "Contact:    " + site_info[
                 "contact"] + "\n\n" + "Address:    " + site_info["address"] )
-            if alert_content is None:
-                l3.setText("No suspicious activity at this site")
+
+            new_list = []
+            if alert_content == "":
+                new_list.append("No new suspicious activity at this site")
                 self.setStyleSheet('background-color:rgb(0,166,50)')
             else:
                 self.setStyleSheet('background-color:rgb(255,165,186); ')
+                alert_content = alert_content.split("`")
+                alert_content.pop()
+                for alert in alert_content:
+                    time, activity, location_description = alert.split("~")
+                    new_list.append("Activity Detected:  " + activity + "\n" + "Time:  " + time + "\n" + "Location Description:  " + location_description)
 
-                l3.setText("Activity Detected:  "+alert_content[1]+"\n\n"+"Time:  "+alert_content[0]+"\n\n"+"Location Description:  "+alert_content[2])
+            old_list = []
+            try:
+                with open(str(id) + ".txt", "r") as log_file:
+                    alert_content = log_file.read()
+            except OSError:
+                alert_content = ""
+            if alert_content == "":
+                old_list.append("No old suspicious activity at this site")
+                self.setStyleSheet('background-color:rgb(0,166,50)')
+            else:
+                self.setStyleSheet('background-color:rgb(255,165,186); ')
+                alert_content = alert_content.split("`")
+                alert_content.pop()
+                for alert in alert_content:
+                    time, activity, location_description = alert.split("~")
+                    old_list.append("Activity Detected:  " + activity + "\n" + "Time:  " + time + "\n" + "Location Description:  " + location_description)
+
+            new_list_widget.addItems(new_list)
+            old_list_widget.addItems(old_list)
+            new_scroll.setWidget(new_list_widget)
+            old_scroll.setWidget(old_list_widget)
 
         l1.setAlignment(Qt.AlignCenter)
         l2.setAlignment(Qt.AlignCenter)
-        l3.setAlignment(Qt.AlignCenter)
+        # new_list_widget.setAlignment(Qt.AlignCenter)
         self.setFixedSize(dialog_width,dialog_height)
         vbox = QVBoxLayout()
         vbox.setSpacing(1)
@@ -49,9 +80,13 @@ class Dialog(QWidget):
         #vbox.addStretch()
         vbox.addWidget(l2)
         #vbox.addStretch()
-        vbox.addWidget(l3)
+        hbox = QHBoxLayout()
+
+        hbox.setSpacing(1)
+        hbox.addWidget(old_scroll)
+        hbox.addWidget(new_scroll)
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
-        print('vv')
         self.setWindowTitle("Site Information")
 
 
@@ -65,7 +100,7 @@ def rectify_time_zone(Time):
 
 
 class Example(QWidget):
-    def __init__(self,server_address):
+    def __init__(self, server_address):
         super().__init__()
         self.server_address=server_address
         self.grid=QGridLayout()
@@ -77,11 +112,13 @@ class Example(QWidget):
     def handle_new_alert(self,message_content):
         id=message_content["SourceID"]
         Time=message_content["Time"]
-        Time=rectify_time_zone(Time)
+        # Time=rectify_time_zone(Time)
 
         activity=message_content["activity_recognized"]
         location_description=message_content["location_description"]
-        self.alert_content[id]=[Time,activity,location_description]
+
+        self.alert_content[id] += (str(Time) + "~" + activity + "~" + location_description +"`")
+
         self.activate_btn(id)
         self.new_alert[id]=1
 
@@ -107,7 +144,10 @@ class Example(QWidget):
     def normal_state(self, id):
 
         self.new_alert[id] = 0
-        self.alert_content[id]=None
+        if self.alert_content[id] is not None:
+            with open(str(id) + ".txt", "a+") as log_file:
+                log_file.write(self.alert_content[id])
+        self.alert_content[id] = ""
         self.button[id].setStyleSheet("color: rgb(40,55,225);background-color:rgb(23,22,33);font-size:24px")
         self.button[id].setEnabled(True)
 
